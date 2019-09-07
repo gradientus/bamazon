@@ -27,10 +27,10 @@ function allProducts() {
       throw err;
     }
     for (var i = 0; i < response.length; i++) {
-      //look into map/reduce/etc, instead of loop
+      //TODO: look into map/reduce/etc, instead of loop
       console.log(
-        `ID: ${response[i].item_id}`,
-        `Product: ${response[i].product_name} `,
+        `ID: ${response[i].item_id}  `,
+        `Product: ${response[i].product_name}  `,
         `$${response[i].price}`
       );
     }
@@ -64,27 +64,36 @@ function buySomething() {
 //check inventory
 function checkInventory(item, qty) {
   connection.query(
-    `SELECT stock_quantity FROM products WHERE item_id = ${item}`,
+    `SELECT stock_quantity, product_name, price FROM products WHERE item_id = ${item}`,
     function(err, res) {
       if (err) throw err;
+      console.log(res);
       let stock = res[0].stock_quantity;
+      let name = res[0].product_name;
+      let price = res[0].price;
       if (stock < qty) {
         console.log("Sorry. There is not enough inventory.");
         wantMore();
       } else {
-        totalOrder(item, qty);
+        totalOrder(item, qty, name, price);
       }
     }
   );
 }
 
 //total order
-function totalOrder(item, qty) {
+function totalOrder(item, qty, prodName, price) {
   connection.query(
     `UPDATE products SET stock_quantity = ${qty} WHERE item_id = ${item} `,
     function(err, res) {
       if (err) throw err;
-      console.log("HERE IS THE INVOICE");
+      let total = qty * price;
+      console.log(`\n-----  HERE IS YOUR INVOICE  ----- \n
+Item Ordered: ${prodName}
+Quantity Ordered: ${qty}
+Price: $${price}
+================\n
+TOTAL: $${total}\n`);
       wantMore();
     }
   );
