@@ -12,17 +12,17 @@ var connection = mysql.createConnection({
 });
 
 //Connect to the database, start the process of purchasing products
-connection.connect(function(err) {
+connection.connect(err => {
   if (err) {
     throw err;
   }
-  console.log(`Connected as ID ${connection.threadId}`);
+  console.log(`\nConnected as ID ${connection.threadId}\n`);
   allProducts();
 });
 
 //Display all inventory
 function allProducts() {
-  connection.query("SELECT * FROM products", function(err, response) {
+  connection.query("SELECT * FROM products", (err, response) => {
     if (err) {
       throw err;
     }
@@ -54,7 +54,7 @@ function buySomething() {
         message: "How many would you like to purchase?"
       }
     ])
-    .then(function(purchase) {
+    .then(purchase => {
       let item = purchase.item;
       let qty = parseInt(purchase.qty);
       checkInventory(item, qty);
@@ -65,14 +65,13 @@ function buySomething() {
 function checkInventory(item, qty) {
   connection.query(
     `SELECT stock_quantity, product_name, price FROM products WHERE item_id = ${item}`,
-    function(err, res) {
+    (err, res) => {
       if (err) throw err;
-      console.log(res);
       let stock = res[0].stock_quantity;
       let name = res[0].product_name;
       let price = res[0].price;
       if (stock < qty) {
-        console.log("Sorry. There is not enough inventory.");
+        console.log("\nSorry. There is not enough inventory.");
         wantMore();
       } else {
         totalOrder(item, qty, name, price);
@@ -85,9 +84,9 @@ function checkInventory(item, qty) {
 function totalOrder(item, qty, prodName, price) {
   connection.query(
     `UPDATE products SET stock_quantity = ${qty} WHERE item_id = ${item} `,
-    function(err, res) {
+    (err, res) => {
       if (err) throw err;
-      let total = qty * price;
+      let total = (qty * price).toFixed(2);
       console.log(`\n-----  HERE IS YOUR INVOICE  ----- \n
 Item Ordered: ${prodName}
 Quantity Ordered: ${qty}
@@ -99,14 +98,29 @@ TOTAL: $${total}\n`);
   );
 }
 
+//ask the user if there is any further business
 function wantMore() {
-  console.log("Would you like to order anything else?");
-  //inquerer here
-  //if yes buySomething()
-  buhBye();
+  inquirer
+    .prompt([
+      {
+        type: "confirm",
+        name: "anythingElse",
+        message: "Would you like to order anything else?",
+        default: true
+      }
+    ])
+    .then(more => {
+      let answer = more.anythingElse;
+      if (answer) {
+        buySomething();
+      } else {
+        buhBye();
+      }
+    });
 }
 
+//break the connection, everything is done
 function buhBye() {
-  console.log("Thanks for shopping at Bamazon.  Come back soon!");
+  console.log("\n\nThanks for shopping at Bamazon.  Come back soon!");
   connection.end();
 }
