@@ -29,8 +29,8 @@ function allProducts() {
     for (var i = 0; i < response.length; i++) {
       //TODO: look into map/reduce/etc, instead of loop
       console.log(
-        `ID: ${response[i].item_id}  `,
-        `Product: ${response[i].product_name}  `,
+        `ID: ${response[i].item_id}   `,
+        `Product: ${response[i].product_name}   `,
         `$${response[i].price}`
       );
     }

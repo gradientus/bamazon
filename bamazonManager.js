@@ -70,16 +70,17 @@ function doThis() {
 
 //list all inventory
 function allProducts() {
-  connection.query("SELECT * FROM products", (err, response) => {
+  connection.query("SELECT * FROM products", (err, res) => {
     if (err) {
       throw err;
     }
-    for (var i = 0; i < response.length; i++) {
+    for (var i = 0; i < res.length; i++) {
       //TODO: look into map/reduce/etc, instead of loop
       console.log(
-        `\nID: ${response[i].item_id}  `,
-        `Product: ${response[i].product_name}  `,
-        `$${response[i].price}`
+        `ID: ${res[i].item_id}   `,
+        `Product: ${res[i].product_name}   `,
+        `Quantity: ${res[i].stock_quantity}   `,
+        `Price: $${res[i].price}\n`
       );
     }
     anythingElse();
@@ -88,18 +89,73 @@ function allProducts() {
 
 //list low inventory
 function lowInventory() {
-  console.log("\nlowInventory");
+  connection.query(
+    "SELECT * FROM products WHERE stock_quantity <=5",
+    (err, res) => {
+      if (err) {
+        throw err;
+      }
+      for (var i = 0; i < res.length; i++) {
+        //TODO: look into map/reduce/etc, instead of loop
+        console.log(
+          `ID: ${res[i].item_id}  `,
+          `Product: ${res[i].product_name}  `,
+          `Quantity: ${res[i].stock_quantity}   `,
+          `Price: $${res[i].price}\n`
+        );
+      }
+      anythingElse();
+    }
+  );
 }
 
 //add inventory to existing products
 function addInventory() {
-  console.log("\naddInventory");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "item",
+        message: "Choose the product that will receive more inventory."
+      },
+      {
+        type: "input",
+        name: "qtyToAdd",
+        message: "How many more units will be added?"
+      }
+    ])
+    .then(add => {
+      let item = add.item;
+      let qtyToAdd = parseInt(add.qtyToAdd);
+      currentQuantity(item, qtyToAdd);
+    });
+}
+
+function currentQuantity(item, qtyToAdd) {
+  connection.query(
+    `SELECT stock_quantity FROM products WHERE item_id = ${item}`,
+    (err, res) => {
+      if (err) throw err;
+      let stock = res[0].stock_quantity;
+      updateQuantity(item, qtyToAdd, stock);
+    }
+  );
+}
+
+function updateQuantity(item, qtyToAdd, stock) {
+  let total = qtyToAdd + stock;
+  console.log(total);
+  connection.query(
+    `UPDATE products SET stock_quantity = ${total} WHERE item_id=${item}`,
+    err => {
+      if (err) throw err;
+    }
+  );
+  anythingElse();
 }
 
 //add new products to inventory
-function newProduct() {
-  console.log("\nnewProduct");
-}
+function newProduct() {}
 
 //does the user want to continue using the application or not
 function anythingElse() {
