@@ -106,9 +106,4 @@ further defined and clarified by project maintainers.
 Instances of abusive, harrassment, or otherwise unacceptable behavior may be
 reported by contacting the project team at Github.
 
-## Acknowledgments
 
-- my class, Ben, the TAs, my husband,
-- the authors of JS, NPM, Axios, Spotify, BandsInTown, OMDB
-- Calliope, the muse of poetry
-- kitties and puppies
