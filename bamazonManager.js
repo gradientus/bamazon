@@ -131,6 +131,7 @@ function addInventory() {
     });
 }
 
+//get the current inventory from the db
 function currentQuantity(item, qtyToAdd) {
   connection.query(
     `SELECT stock_quantity FROM products WHERE item_id = ${item}`,
@@ -142,9 +143,10 @@ function currentQuantity(item, qtyToAdd) {
   );
 }
 
+//update the inventory to the new amount
 function updateQuantity(item, qtyToAdd, stock) {
   let total = qtyToAdd + stock;
-  console.log(total);
+  console.log(`\nIncreased Item ID ${item}.  Stock quantity: ${total}`);
   connection.query(
     `UPDATE products SET stock_quantity = ${total} WHERE item_id=${item}`,
     err => {
@@ -155,7 +157,51 @@ function updateQuantity(item, qtyToAdd, stock) {
 }
 
 //add new products to inventory
-function newProduct() {}
+function newProduct() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "product",
+        message: "What is the name of the new product?"
+      },
+      {
+        type: "input",
+        name: "price",
+        message: "What is the price of the for each unit?"
+      },
+      {
+        type: "input",
+        name: "qty",
+        message: "How many are being added to inventory?"
+      },
+      {
+        type: "input",
+        name: "dpt",
+        message: "What is the name of the department?"
+      }
+    ])
+    .then(inv => {
+      let product = inv.product;
+      let price = parseFloat(inv.price).toFixed(2);
+      let qty = parseInt(inv.qty);
+      let dpt = inv.dpt;
+      insertInventory(product, price, qty, dpt);
+    });
+}
+
+//insert the new product into inventory
+function insertInventory(product, price, qty, dpt) {
+  connection.query(
+    `INSERT INTO products (product_name, price, stock_quantity, department_name)
+    VALUES (?, ?, ?, ?)`,
+    [product, price, qty, dpt],
+    err => {
+      if (err) throw err;
+    }
+  );
+  anythingElse();
+}
 
 //does the user want to continue using the application or not
 function anythingElse() {
